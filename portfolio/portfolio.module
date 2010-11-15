@@ -1,0 +1,12 @@
+<?php
+
+include_once('portfolio.features.inc');
+
+/**
+ * Implementation of hook_init().
+ */
+function portfolio_init() {
+  $path = drupal_get_path('module', 'portfolio');
+  $file_path = $path .'/theme/portfolio.css';
+  drupal_add_css($file_path);
+}

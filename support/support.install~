@@ -1,0 +1,137 @@
+<?php
+/**
+ * @file support.install
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function support_install() {
+  // Taxonomy:
+  // Create Support Ticket Tags vocabulary.
+  $vocabs = taxonomy_get_vocabularies();
+  _support_install_vocabulary($vocabs );
+}
+
+/**
+ * Implementation of hook_uninstall(). 
+ */
+function support_uninstall() {
+  // Taxonomy: 
+  // Delete Support Ticket Tags vocabulary.
+  _support_uninstall_taxonomoy();
+
+}
+
+//------------------------
+// Internal functions
+//------------------------
+
+/**
+ * Create Support Ticket Tags vocabulary.
+ * 
+ * @param
+ *  $vocabs, array, vocab objects returned by taxonomy_get_vocabularies()
+ */
+function _support_install_vocabulary($vocabs) {
+  foreach($vocabs as $vocab) { 
+    // Check if Support TIcket Tags vocabulay already exists.
+    if ($vocab->name == 'Support Ticket Tags') {
+      $vocab_exists = TRUE; 
+    } else {
+      $vocab_exists = FALSE;
+    }
+    // vid 5 is reserved for 'Support Ticket Tags'
+    // @see owh TAXONOMY.txt
+    if ($vocab->vid == 5) {
+      $vocab_name = $vocab->name;
+    }
+  }
+
+  // Configure ticket categories vocabulary
+  $new_vocab = _support_vocab(); 
+
+  // Create Support Ticket Tags vocabulary.
+  if (!$vocab_exists || !$vocab_name) {
+    $status = taxonomy_save_vocabulary($new_vocab);
+    if ($status == 1) {
+      drupal_set_message(t('Support Ticket Tags vocabulary has been created.'));
+    } else if ($status == 2) {
+      // Taxonomy_save_vocabulary returns status 2 when it tries to update
+      // an existing record. But if Support Ticket Tags existed before, and 
+      // then got deleted with an uninstall, the update fails. 
+      // "UPDATE vocabulary SET xxx WHERE vid = 6" doesn't update 
+      // anything when vid 6 does not exist.
+      $result = db_result(db_query("SELECT vid FROM vocabulary WHERE vid = 6"));
+      if ($result != 6) {
+        db_query("INSERT INTO vocabulary (vid) VALUES (6) ");
+        $status = taxonomy_save_vocabulary($new_vocab);
+        if ($status == 2) {
+          drupal_set_message(t('Support Ticket Tags has been created.'));
+        } else {
+          drupal_set_message(t('Support Ticket Tags was not created. '
+          .'taxonomy_save_vocabulary returned status: '. $status 
+          .'. please notify an administrator.'));
+        }
+      }
+    } else {
+      drupal_set_message(t('Support Ticket Tags was not created. '
+        .'taxonomy_save_vocabulary returned status: '. $status 
+        .'. please notify an administrator.'));
+    }
+  // Error handling: 
+  } else if ($vocab_exists && $vocab_name != 'Support Ticket Tags') {
+    drupal_set_message(t('Support Ticket Tags already exists, but it '
+      .'is not configured properly (the vid does not equal 6). Please '
+      .'contact an administrator.'));
+  } else if (!$vocab_exists && $vocab_name) {
+    drupal_set_message(t('Support Ticket Tags could not be created. '
+      .'%vocab is squatting in vid 6. Please contact a site administrator.'), 
+      array('%vocab' => $vocab_name));
+  }
+}
+
+/**
+ * @return
+ *  array, ticket categories vocabulary configuration 
+ */
+function _support_vocab() {
+  // Create Support Ticket Tags freetagging vocab 
+  $new_vocab = ''; 
+  $new_vocab = array(
+    'vid' => '6',
+    'name' => 'Support Ticket Tags',
+    'multiple' => 0,
+    'required' => 0,
+    'hierarchy' => 0,
+    'relations' => 0,
+    'weight' => 1,
+    'nodes' => array('ticket' => 1), 
+    'tags' => TRUE,
+    'help' => t('Tags for support tickets.'),
+  );  
+  return $new_vocab;
+}
+
+/**
+ * Remove ticket node type from Keywords vocabulary.
+ * Delete Resource Categories vocabulary.
+ */
+function _support_uninstall_taxonomoy() {
+  $vocabs = taxonomy_get_vocabularies();
+  foreach($vocabs as $vocab) { 
+    // Delete Support Tags vocabulary.
+    if ($vocab->name == 'Support Ticket Tags') {
+      $vocab_deleted = TRUE; 
+      $vid = $vocab->vid;
+      $status = taxonomy_del_vocabulary($vid);
+    }
+  }
+  if ($status == 3 && $vocab_deleted) {
+    drupal_set_message(t('Support Ticket Tags has been deleted.'));
+  } else {
+    drupal_set_message(t('There are no vocabularies named "Support '
+     .'Ticket Tags. No vocabularies have been deleted. Please notify '
+     .'a site administrator.'));
+  }
+}

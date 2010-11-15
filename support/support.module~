@@ -1,0 +1,13 @@
+<?php
+
+include_once('support.features.inc');
+
+/**
+ * Implementation of hook_init().
+ */
+function designs_init(){
+  $path = drupal_get_path('module', 'designs');
+  $file_path = $path .'/theme/designs.css';
+  drupal_add_css($file_path);
+}
+

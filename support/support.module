@@ -1,0 +1,13 @@
+<?php
+
+include_once('support.features.inc');
+
+/**
+ * Implementation of hook_init().
+ */
+function support_init(){
+  $path = drupal_get_path('module', 'support');
+  $file_path = $path .'/theme/support.css';
+  drupal_add_css($file_path);
+}
+

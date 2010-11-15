@@ -1,0 +1,31 @@
+/* Views Block: New Designs */  
+  #block-views-new_designs-block_1 .design-title
+  {
+    font-size: 15px;  
+  }
+
+  #block-views-new_designs-block_1 .design-pic
+  {
+    margin-bottom: 20px;
+  }
+
+/* Views Page (path: /designs) */  
+
+  .view-display-id-page_1 .design-title
+  { 
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  .view-display-id-page_1 .design-pic
+  {
+    float:left;    
+    margin-bottom: 60px;
+    margin-right: 20px;
+  }
+
+  .view-display-id-page_1 .design-text
+  { 
+    float:right;
+    width: 300px;
+  }

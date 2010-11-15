@@ -1,0 +1,14 @@
+<?php
+
+include_once('pricing.features.inc');
+
+
+/**
+ * Implementation of hook_init().
+ */
+function pricing_init(){
+  $path = drupal_get_path('module', 'pricing');
+  $file_path = $path .'/theme/pricing.css';
+  drupal_add_css($file_path);
+}
+
